@@ -2,31 +2,31 @@ import itertools
 from word_finder import WordFinder
 
 distribution = {
-	'a': 13,
-	'b': 3,
-	'c': 3,
-	'd': 6,
-	'e': 18,
-	'f': 3,
-	'g': 4,
-	'h': 3,
-	'i': 12,
-	'j': 2,
-	'l': 5,
-	'm': 3,
-	'n': 8,
-	'o': 11,
-	'p': 3,
-	'q': 2,
-	'r': 9,
-	's': 6,
-	't': 9,
-	'u': 6,
-	'v': 3,
-	'w': 3,
-	'x': 2,
-	'y': 3,
-	'z': 2
+	'A': 13,
+	'B': 3,
+	'C': 3,
+	'D': 6,
+	'E': 18,
+	'F': 3,
+	'G': 4,
+	'H': 3,
+	'I': 12,
+	'J': 2,
+	'L': 5,
+	'M': 3,
+	'N': 8,
+	'O': 11,
+	'P': 3,
+	'Q': 2,
+	'R': 9,
+	'S': 6,
+	'T': 9,
+	'U': 6,
+	'V': 3,
+	'W': 3,
+	'X': 2,
+	'Y': 3,
+	'Z': 2
 }
 
 
@@ -92,11 +92,11 @@ class Player(object):
 
 if __name__ == '__main__':
 	with open('scrabble_dictionary.txt') as f:
-		legal_words = [line.strip().lower() for line in f.readlines()]
+		legal_words = [line.strip().upper() for line in f.readlines()]
 	wf = WordFinder(legal_words)
 
 	g = Game(distribution, wf)
-	plays = g.available_plays(letters='abcde', words=['death','hello'])
+	plays = g.available_plays(letters='ABCDE', words=['DEATH','HELLO'])
 
 	for p in plays:
 		print(p)

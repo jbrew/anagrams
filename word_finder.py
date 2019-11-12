@@ -13,7 +13,7 @@ def sieve_of_eratosthenes(limit):
 	return [i for i, p in enumerate(primes) if p]
 
 # takes an alphabet and a list of primes at least as long as the alphabet
-def letters_to_primes_lookup(primes, alphabet='abcdefghijklmnopqrstuvwxyz'):
+def letters_to_primes_lookup(primes, alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ'):
 	return {alphabet[i]: primes[i] for i in range(len(alphabet))}
 
 
@@ -101,7 +101,7 @@ class WordFinder(object):
 				formable_words.extend(self.anagram_dict[node])
 		return sorted(formable_words, key=len)
 
-	def combos_from_n_blanks(self, num_blanks, alphabet='abcdefghijklmnopqrstuvwxyz'):
+	def combos_from_n_blanks(self, num_blanks, alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ'):
 		"""
 		Given a number of blanks, finds all unique combinations
 		of n (or fewer) letters from an alphabet.
@@ -157,11 +157,11 @@ class WordFinder(object):
 
 def ui_loop():
 	with open('scrabble_dictionary.txt') as f:
-		legal_words = [line.strip().lower() for line in f.readlines()]
+		legal_words = [line.strip().upper() for line in f.readlines()]
 	wf = WordFinder(legal_words)
 	while True:
 		user_input = input('Enter letters:\n')
-		letters = ''.join([c for c in user_input if not c=='?'])
+		letters = ''.join([c for c in user_input if not c=='?']).upper()
 		num_blanks = len([c for c in user_input if c=='?'])
 		print('\n'.join(wf.words_formable_from_letters(letters, num_blanks)))
 
