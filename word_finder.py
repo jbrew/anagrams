@@ -91,12 +91,12 @@ class WordFinder(object):
 		return sorted(formable_words, key=len)
 
 	def combos_from_n_blanks(self, num_blanks, alphabet='abcdefghijklmnopqrstuvwxyz'):
-	"""
-	Given a number of blanks, finds all unique combinations
-	of n (or fewer) letters from an alphabet.
-	"""
-		if num_blanks == 1:
-			return list(alphabet)
+		"""
+		Given a number of blanks, finds all unique combinations
+		of n (or fewer) letters from an alphabet.
+		"""
+		if num_blanks == 0:
+			return []
 		else:
 			permutations = list(alphabet)
 			for i, letter in enumerate(alphabet):
@@ -104,30 +104,30 @@ class WordFinder(object):
 			return permutations
 
 	def get_factor_tree_nodes(self, key, num_blanks=0):
-	"""
-	Given a key representing a letter set, find keys for all unique
-	letter sets formable by removing any number of letters and 
-	adding up to [num_blanks] letters.
+		"""
+		Given a key representing a letter set, find keys for all unique
+		letter sets formable by removing any number of letters and 
+		adding up to [num_blanks] letters.
 
-	# Note on handling blanks
+		# Note on handling blanks
 
-	When adding a letter to the letter set, we want to find all the letter
-	sets it enables, but we need to AVOID duplicating any of the
-	letter sets that were already possible WITHOUT the blank.
+		When adding a letter to the letter set, we want to find all the letter
+		sets it enables, but we need to AVOID duplicating any of the
+		letter sets that were already possible WITHOUT the blank.
 
-	Our approach here is to omit the letter's associated prime from
-	the list of primes to check while descending the expanded letter set's
-	factor tree. So once the blank has been added to the set via multiplication,
-	we will not remove it by division.
+		Our approach here is to omit the letter's associated prime from
+		the list of primes to check while descending the expanded letter set's
+		factor tree. So once the blank has been added to the set via multiplication,
+		we will not remove it by division.
 
-	This has the effect of saying, to the expanded letter set fuction:
-		"DO NOT DELETE THIS NEW LETTER! YOU MUST USE IT!"
-	"""
+		This has the effect of saying, to the expanded letter set fuction:
+			"DO NOT DELETE THIS NEW LETTER! YOU MUST USE IT!"
+		"""
 
-		# first, find factor tree nodes with our original letter set as the root
+		# First, find factor tree nodes with our original letter set as the root
 		factor_tree_nodes = self.factor_tree_descendants(key, self.primes)
 
-		# compute all possible letter sets from the given number of blanks
+		# Compute all possible letter sets from the given number of blanks
 		blank_sets_to_add = self.combos_from_n_blanks(num_blanks)
 		
 		for blank_values in blank_sets_to_add:
@@ -144,11 +144,20 @@ class WordFinder(object):
 			factor_tree_nodes.extend(self.factor_tree_descendants(key*product, primes_subset))
 		return factor_tree_nodes
 
-if __name__ == '__main__':
+
+def ui_loop():
 	with open('scrabble_dictionary.txt') as f:
 		legal_words = [line.strip().lower() for line in f.readlines()]
-	
 	wf = WordFinder(legal_words)
-	print(wf.words_formable_from_letters('taxi', num_blanks=2))
-	wf.words_formable_from_letters('taxi', num_blanks=5)
+	while True:
+		user_input = input('Enter letters:\n')
+		letters = ''.join([c for c in user_input if not c=='?'])
+		num_blanks = len([c for c in user_input if c=='?'])
+		print('\n'.join(wf.words_formable_from_letters(letters, num_blanks)))
+
+
+if __name__ == '__main__':
+	
+	ui_loop()
+
 
