@@ -17,23 +17,31 @@ def letters_to_primes_lookup(primes, alphabet='abcdefghijklmnopqrstuvwxyz'):
 	return {alphabet[i]: primes[i] for i in range(len(alphabet))}
 
 
+
 class WordFinder(object):
 
 	def __init__(self, words):
 		
 		self.primes = sieve_of_eratosthenes(1000)[:26]			# 26 primes for the 26 letters of the alphabet
 		self.lookup = letters_to_primes_lookup(self.primes)
+		self.reverse_lookup = {v: k for k, v in self.lookup.items()}
 		self.anagram_dict = self.build_anagram_dictionary(words)
 
-	def anagram_key_for_word(self, word):
+	def anagram_key_for_letters(self, letters):
 		"""
-		Multiply together the primes associated with each letter of the word.
+		Multiply together the primes associated with each letter in the set.
 		Words containing the same set of letters will yield the same product.
 		"""
 		product = 1
-		for letter in word:
+		for letter in letters:
 			product *= self.lookup[letter]
 		return product
+
+	def letters_for_anagram_key(self, letters):
+		factors = [f for f in self.factor_tree_descendants(letters) if f in self.primes]
+		letters = [self.reverse_lookup[f] for f in factors]
+		return ''.join(letters)
+
 
 	def build_anagram_dictionary(self, words):
 		"""
@@ -42,14 +50,14 @@ class WordFinder(object):
 		"""
 		d = {}
 		for word in words:
-			key = self.anagram_key_for_word(word)		
+			key = self.anagram_key_for_letters(word)		
 			if key in d:
 				d[key].add(word)
 			else:
 				d[key] = set([word])
 		return d
 
-	def factor_tree_descendants(self, n, primes, start_index=0):
+	def factor_tree_descendants(self, n, primes=None, start_index=0):
 		"""
 		Returns a list of keys at all nodes in the factor tree with n
 		as the root by trying to divide by all primes in the list
@@ -66,6 +74,9 @@ class WordFinder(object):
 		once we have divided 150 by 5 to get 30, we move that branch's start
 		index to 5, so we won't try dividing by 3.
 		"""
+		if not primes:
+			primes=self.primes
+
 		factor_tree_nodes = [n]
 		index = start_index
 		while index < len(primes):
@@ -80,7 +91,7 @@ class WordFinder(object):
 		Find all words formable with any subset of the given letters
 		and up to [num_blanks] blank wildcards.
 		"""
-		key = self.anagram_key_for_word(letters)
+		key = self.anagram_key_for_letters(letters)
 		primes=list(self.lookup.values())
 		factor_tree_nodes = self.get_factor_tree_nodes(key, num_blanks=num_blanks)
 
@@ -143,7 +154,6 @@ class WordFinder(object):
 			
 			factor_tree_nodes.extend(self.factor_tree_descendants(key*product, primes_subset))
 		return factor_tree_nodes
-
 
 def ui_loop():
 	with open('scrabble_dictionary.txt') as f:
