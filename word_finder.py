@@ -1,4 +1,3 @@
-import math
 
 
 # finds all primes up to a limit
@@ -6,7 +5,7 @@ def sieve_of_eratosthenes(limit):
 	primes = [True for x in range(limit)]
 	primes[0] = False    # 0 is not prime
 	primes[1] = False    # 1 is not prime
-	for n in range(math.floor(limit/2)):
+	for n in range(limit//2):
 		if primes[n]:
 			for i in range(2*n, limit, n):
 				primes[i] = False
@@ -36,12 +35,6 @@ class WordFinder(object):
 		for letter in letters:
 			product *= self.lookup[letter]
 		return product
-
-	def letters_for_anagram_key(self, letters):
-		factors = [f for f in self.factor_tree_descendants(letters) if f in self.primes]
-		letters = [self.reverse_lookup[f] for f in factors]
-		return ''.join(letters)
-
 
 	def build_anagram_dictionary(self, words):
 		"""
@@ -155,10 +148,38 @@ class WordFinder(object):
 			factor_tree_nodes.extend(self.factor_tree_descendants(key*product, primes_subset))
 		return factor_tree_nodes
 
-def ui_loop():
-	with open('scrabble_dictionary.txt') as f:
-		legal_words = [line.strip().upper() for line in f.readlines()]
-	wf = WordFinder(legal_words)
+	def letters_for_anagram_key(self, key):
+		factors = [f for f in self.factor_tree_descendants(key) if f in self.primes]
+		#factors = self.factorize(key)		# TODO: properly factorize instead of finding unique factors
+		letters = [self.reverse_lookup[f] for f in factors]
+		return ''.join(letters)
+
+	def factorize(self, n):
+		"""
+		Return a list of prime factors of n
+		"""
+		factors = []
+		i = 2
+		limit = n//2
+		while i <= limit:
+			while n%i == 0:
+				factors.append(i)
+				n = n / i
+			i = i + 1
+		return factors
+
+
+def factorize_test(wf):
+
+	assert(wf.factorize(49) == [7,7])
+	assert(wf.factorize(50) == [2,5,5])
+	assert(wf.factorize(100) == [2,2,5,5])
+	assert(wf.factorize(9797) == [97,101])
+
+
+
+def ui_loop(wf):
+	print(wf.factorize(9797))
 	while True:
 		user_input = input('Enter letters:\n')
 		letters = ''.join([c for c in user_input if not c=='?']).upper()
@@ -167,7 +188,12 @@ def ui_loop():
 
 
 if __name__ == '__main__':
+	with open('scrabble_dictionary.txt') as f:
+		legal_words = [line.strip().upper() for line in f.readlines()]
+	wf = WordFinder(legal_words)
 	
-	ui_loop()
+	factorize_test(wf)
+
+	ui_loop(wf)
 
 
