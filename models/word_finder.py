@@ -16,7 +16,6 @@ def letters_to_primes_lookup(primes, alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ'):
 	return {alphabet[i]: primes[i] for i in range(len(alphabet))}
 
 
-
 class WordFinder(object):
 
 	def __init__(self, words):
@@ -49,35 +48,6 @@ class WordFinder(object):
 			else:
 				d[key] = set([word])
 		return d
-
-	def factor_tree_descendants(self, n, primes=None, start_index=0):
-		"""
-		Returns a list of keys at all nodes in the factor tree with n
-		as the root by trying to divide by all primes in the list
-		after a given start_index.
-
-		We move the start index at each level to ensure that we only
-		report each node once.
-
-		Example: If the given key is 150, we could reach the node
-		at 10 by two paths: by dividing by 3 then 5, OR 5 then 3. 
-		
-		We avoid this by only checking primes that are equal to or greater
-		than the highest prime checked in the current branch. In our example,
-		once we have divided 150 by 5 to get 30, we move that branch's start
-		index to 5, so we won't try dividing by 3.
-		"""
-		if not primes:
-			primes=self.primes
-
-		factor_tree_nodes = [n]
-		index = start_index
-		while index < len(primes):
-			if n % primes[index] == 0:
-				result = n // primes[index]
-				factor_tree_nodes.extend(self.factor_tree_descendants(result, primes, start_index=index))
-			index += 1
-		return factor_tree_nodes
 
 	def words_formable_from_letters(self, letters, num_blanks=0):
 		"""
@@ -148,6 +118,35 @@ class WordFinder(object):
 			factor_tree_nodes.extend(self.factor_tree_descendants(key*product, primes_subset))
 		return factor_tree_nodes
 
+	def factor_tree_descendants(self, n, primes=None, start_index=0):
+		"""
+		Returns a list of keys at all nodes in the factor tree with n
+		as the root by trying to divide by all primes in the list
+		after a given start_index.
+
+		We move the start index at each level to ensure that we only
+		report each node once.
+
+		Example: If the given key is 150, we could reach the node
+		at 10 by two paths: by dividing by 3 then 5, OR 5 then 3. 
+		
+		We avoid this by only checking primes that are equal to or greater
+		than the highest prime checked in the current branch. In our example,
+		once we have divided 150 by 5 to get 30, we move that branch's start
+		index to 5, so we won't try dividing by 3.
+		"""
+		if not primes:
+			primes=self.primes
+
+		factor_tree_nodes = [n]
+		index = start_index
+		while index < len(primes):
+			if n % primes[index] == 0:
+				result = n // primes[index]
+				factor_tree_nodes.extend(self.factor_tree_descendants(result, primes, start_index=index))
+			index += 1
+		return factor_tree_nodes
+
 
 def factorize_test(wf):
 
@@ -157,9 +156,7 @@ def factorize_test(wf):
 	assert(wf.factorize(9797) == [97,101])
 
 
-
 def ui_loop(wf):
-	print(wf.factorize(9797))
 	while True:
 		user_input = input('Enter letters:\n')
 		letters = ''.join([c for c in user_input if not c=='?']).upper()
@@ -168,7 +165,7 @@ def ui_loop(wf):
 
 
 if __name__ == '__main__':
-	with open('scrabble_dictionary.txt') as f:
+	with open('resources/scrabble_dictionary.txt') as f:
 		legal_words = [line.strip().upper() for line in f.readlines()]
 	wf = WordFinder(legal_words)
 	
