@@ -39,7 +39,7 @@ if __name__ == '__main__':
 	wf = WordFinder(legal_words)
 	g = Game(distribution, wf, frequency_by_word)
 	
-	#binary_compounds_loop(legal_words, wf)
+	binary_compounds_loop(legal_words, wf)
 	#possibility_loop(g)
 	#plays_for_word_loop(g)
 
