@@ -46,7 +46,7 @@ def string_for_play(play):
 
 class Game(object):
 
-	def __init__(self, distribution, word_finder):
+	def __init__(self, distribution, word_finder, frequency_by_word):
 		
 		self.all_letters = distribution
 		self.letter_pool = []
@@ -54,10 +54,17 @@ class Game(object):
 		self.player_words = {}		# format {'name': ['listed', 'words']}
 		
 		self.wf = word_finder
+		self.frequency_by_word = frequency_by_word
 
 	def reveal_letter(self):
 		pass
 
+	def frequency(self, word):
+		key = word.upper()
+		if key in self.frequency_by_word:
+			return self.frequency_by_word[key]
+		else:
+			return 1	# default low frequency
 	
 	def available_plays(self, letters, words=[]):
 		"""
@@ -118,8 +125,9 @@ class Game(object):
 		combos = self.wf.combos_from_n_blanks(num_letters_added)
 		combo_keys = [self.wf.anagram_key_for_letters(c) for c in combos]
 
-		# sort by ascending length
-		return sorted(self.plays_for_word_and_combos(word, combo_keys), key=lambda x: len(x['additions']))
+		# sort by ascending length, then by frequency in the google corpus
+		return sorted(self.plays_for_word_and_combos(word, combo_keys),
+													 key=lambda x: (len(x['additions']), self.frequency(x['results'][0])))
 
 
 ### PLAYERS ###
@@ -159,6 +167,7 @@ def possibility_loop(game):
 			print(string_for_play(play))
 
 
+
 def plays_for_word_loop(game):
 	while True:
 		word, letters = input('Enter word and letter pool:\n').upper().split(' ')
@@ -174,11 +183,12 @@ if __name__ == '__main__':
 		legal_words = [line.strip().upper() for line in f.readlines()]
 
 	with open('count_1w.txt') as f:
-		word_rates = [line.strip().upper().split() for line in f.readlines()]
+		word_freqs = [line.strip().upper().split() for line in f.readlines()]
 
+	frequency_by_word = {w: int(f) for w, f in word_freqs}
 
 	wf = WordFinder(legal_words)
-	g = Game(distribution, wf)
+	g = Game(distribution, wf, frequency_by_word)
 	available_plays_test(g)
 	possibility_loop(g)
 	#plays_for_word_loop(g)
