@@ -146,8 +146,9 @@ def available_plays_test(game):
 		print(string_for_play(play))
 
 def possibility_loop(game):
+	print()
 	while True:
-		user_input = input('Enter a word:\n')
+		user_input = input('Enter a word and some question marks:\n')
 		args = user_input.strip().split()
 
 		if not len(args) in [1,2]:
