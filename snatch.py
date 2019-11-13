@@ -1,6 +1,7 @@
 import itertools
 from word_finder import WordFinder
 
+# How many of each bananagram tile there are
 distribution = {
 	'A': 13,
 	'B': 3,
@@ -30,6 +31,18 @@ distribution = {
 	'Z': 2
 }
 
+def string_for_distribution(distribution):
+	"""
+	Represent letter distribution as a big old string
+	"""
+	return ''.join([''.join([k for i in range(v)]) for k, v in distribution.items()])
+
+### UI SUGAR ###
+
+def string_for_play(play):
+	return "{} + {} --> {}".format(	play['base'],
+									play['additions'],
+									' or '.join(play['results']))
 
 class Game(object):
 
@@ -45,9 +58,12 @@ class Game(object):
 	def reveal_letter(self):
 		pass
 
-	# plays that can be made by combining any of the given letters
-	# with any of the given words
+	
 	def available_plays(self, letters, words=[]):
+		"""
+		Plays that can be made by combining any of the given letters
+		with any of the given words.
+		"""
 		key_for_all_letters = self.wf.anagram_key_for_letters(letters)
 		combo_keys = self.wf.factor_tree_descendants(key_for_all_letters)
 		plays = []
@@ -56,32 +72,57 @@ class Game(object):
 		return plays
 
 	def plays_for_word_and_combos(self, word, letter_combo_keys):
+		"""
+		Given a word and a list of keys corresponding to unique letter
+		combinations that could be added to it, find all plays that can
+		be made using the whole word and the whole of any of the combos.
+		"""
 		word_key = self.wf.anagram_key_for_letters(word)
-
 		plays = []
 		for combo_key in letter_combo_keys:
-			combo_letters = self.wf.letters_for_anagram_key(combo_key)
 			product = word_key * combo_key
 			if product in self.wf.anagram_dict:
 				plays_using_letters = list(self.wf.anagram_dict[product])
 				valid_plays = [p for p in plays_using_letters if len(p) > len(word)]
 				if len(valid_plays) > 0:
-					plays.append({'base': word, 'additions': combo_letters, 'results': valid_plays})
+					difference = self.difference_between_words(word, valid_plays[0])
+					plays.append({'base': word, 'additions': difference, 'results': valid_plays})
 
 		return plays
 
-	def string_for_distribution(self, distribution):
-		return ''.join([''.join([k for i in range(v)]) for k, v in distribution.items()])
+	def difference_between_words(self, small, big):
+		"""
+		Return the letters that must be added to a smaller word
+		to make a bigger word.
 
-	# plays that would be possible by revealing some number of letters
+		Maybe we can do this more elegantly with primes.
+		"""
+		small, big = list(small), list(big)
+		while len(small) > 0:
+			big.remove(small[0])
+			small.pop(0)
+		return ''.join(big)
+
 	def possibilities(self, word, num_letters_added=1):
-		letter_pool = self.string_for_distribution(self.all_letters)
+		"""
+		
+		Find plays that would be possible with some number of
+		added letters. This problem is nearly equivalent to a scrabble
+		hand with blanks.
+
+		TODO: Calculate possibilities based on actual remaining distribution,
+		rather than treating each blank as a total wildcard.
+
+		"""
+		letter_pool = string_for_distribution(self.all_letters)
 		combos = self.wf.combos_from_n_blanks(num_letters_added)
 		combo_keys = [self.wf.anagram_key_for_letters(c) for c in combos]
+
+		# sort by ascending length
 		return sorted(self.plays_for_word_and_combos(word, combo_keys), key=lambda x: len(x['additions']))
 
-### PLAYERS ###
 
+### PLAYERS ###
 
 class Player(object):
 
@@ -90,26 +131,32 @@ class Player(object):
 		self.words = []
 
 
-
-### UI SUGAR ###
-
-def play_string(play):
-	return "{} + {} --> {}".format(	play['base'],
-									play['additions'],
-									' or '.join(play['results']))
-
-
-### TESTS ####
-
+### TESTS AND DEMOS ####
 
 def available_plays_test(game):
-	for play in game.available_plays(letters='ABCDE', words=['HELLO','RACHEL']):
-		print(play_string(play))
+	for play in game.available_plays(letters='ABCDETNAPE', words=['HELLO','DARKNESS']):
+		print(string_for_play(play))
 
-def possibility_demo(game):
-	print()
-	for play in g.possibilities('HEATED', 2):
-		print(play_string(play))
+def possibility_loop(game):
+	while True:
+		user_input = input('Enter a word:\n')
+		args = user_input.strip().split()
+
+		if not len(args) in [1,2]:
+			print('Please enter either:\n\t> [word]\n...or:\n> [word] [# of blanks]')
+			continue
+
+		if len(args) == 1:
+			letters = ''.join([c for c in args[0] if not c=='?']).upper()
+			num_blanks = len([c for c in args[0] if c=='?'])
+			plays = game.possibilities(letters, num_blanks)
+		elif len(args) == 2:
+			letters = args[0]
+			num_blanks = args[1]
+			plays = game.possibilities(letters, num_blanks)
+		
+		for play in plays:
+			print(string_for_play(play))
 
 
 def plays_for_word_loop(game):
@@ -119,7 +166,7 @@ def plays_for_word_loop(game):
 		combo_keys = game.wf.factor_tree_descendants(key_for_letters)
 
 		for play in game.plays_for_word_and_combos(word, combo_keys):
-			print(play_string(play))
+			print(string_for_play(play))
 
 
 if __name__ == '__main__':
@@ -131,10 +178,9 @@ if __name__ == '__main__':
 
 
 	wf = WordFinder(legal_words)
-
 	g = Game(distribution, wf)
-	#available_plays_test(g)
-	possibility_demo(g)
+	available_plays_test(g)
+	possibility_loop(g)
 	#plays_for_word_loop(g)
 
 	
