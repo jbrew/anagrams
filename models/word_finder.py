@@ -1,4 +1,4 @@
-
+import random
 
 # finds all primes up to a limit
 def sieve_of_eratosthenes(limit):
@@ -55,7 +55,6 @@ class WordFinder(object):
 		and up to [num_blanks] blank wildcards.
 		"""
 		key = self.anagram_key_for_letters(letters)
-		primes=list(self.lookup.values())
 		factor_tree_nodes = self.get_factor_tree_nodes(key, num_blanks=num_blanks)
 
 		formable_words = []
@@ -146,6 +145,29 @@ class WordFinder(object):
 				factor_tree_nodes.extend(self.factor_tree_descendants(result, primes, start_index=index))
 			index += 1
 		return factor_tree_nodes
+
+
+	def find_binary_compounds(self, word, min_size):
+		"""
+		Find all ways (if there are any) to split word into
+		valid subsets of letters of at least min_size.
+		"""
+		key = self.anagram_key_for_letters(word)
+		factor_tree_nodes = self.get_factor_tree_nodes(key, num_blanks=0)
+
+		compounds = []
+		for node in factor_tree_nodes:
+			if node in self.anagram_dict:
+				node_words = list(self.anagram_dict[node])
+				if len(node_words[0]) >= min_size:
+					complement = key/node
+					if complement in self.anagram_dict and complement > node:	# no duplicates
+						complement_words = list(self.anagram_dict[complement])
+						if len(complement_words[0]) >= min_size:
+							compounds.append((random.choice(node_words), random.choice(complement_words)))
+		return compounds
+
+		
 
 
 def factorize_test(wf):
