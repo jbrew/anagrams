@@ -2,7 +2,7 @@
 
 A library for playing and analyzing the game of [Snatch](https://en.wikipedia.org/wiki/Anagrams).
 
-Run the main script:
+To run the main script:
 `python snatch.py`
 
 ————
