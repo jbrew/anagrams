@@ -1,4 +1,5 @@
 import random
+from collections import Counter
 
 # finds all primes up to a limit
 def sieve_of_eratosthenes(limit):
@@ -18,12 +19,13 @@ def letters_to_primes_lookup(primes, alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ'):
 
 class WordFinder(object):
 
-	def __init__(self, words):
-		
+	def __init__(self, words, frequency_by_word):
+		self.words = words
 		self.primes = sieve_of_eratosthenes(1000)[:26]			# 26 primes for the 26 letters of the alphabet
 		self.lookup = letters_to_primes_lookup(self.primes)
 		self.reverse_lookup = {v: k for k, v in self.lookup.items()}
 		self.anagram_dict = self.build_anagram_dictionary(words)
+		self.frequency_by_word = frequency_by_word
 
 	def anagram_key_for_letters(self, letters):
 		"""
@@ -104,7 +106,6 @@ class WordFinder(object):
 		blank_sets_to_add = self.combos_from_n_blanks(num_blanks)
 		
 		for blank_values in blank_sets_to_add:
-			#print(blank_values) 				# uncomment this for a fun time
 			product = 1
 			primes_subset = self.primes
 
@@ -166,8 +167,51 @@ class WordFinder(object):
 						if len(complement_words[0]) >= min_size:
 							compounds.append((random.choice(node_words), random.choice(complement_words)))
 		return compounds
-
 		
+	def difference_between_words(self, small, big):
+		"""
+		Given a big word that contains all the letters
+		of a smaller word, find the letters we need to
+		add to the smaller word to make the bigger word.
+		"""
+		small_count, big_count = Counter(small), Counter(big)
+		for k, v in small_count.items():
+			big_count[k] -= small_count[k]
+		return ''.join([k*v for k, v in big_count.items()])
+
+	def frequency(self, word):
+		key = word.upper()
+		if key in self.frequency_by_word:
+			return self.frequency_by_word[key]
+		else:
+			return 1	# default low frequency
+
+	def snowball_paths_for_word(self, word):
+		"""
+		Wrapper function for below
+		"""
+		key = self.anagram_key_for_letters(word)
+		paths = self.snowball_paths_for_key(key)
+		return paths
+
+	def snowball_paths_for_key(self, key):
+		next_step = [key//prime for prime in self.primes if key % prime == 0]
+		valid_next_steps = [key for key in next_step if key in self.anagram_dict]
+		
+		if len(valid_next_steps) == 0:
+			return [[]]
+		else:
+			possible_paths = []
+			for key in valid_next_steps:
+				for path in self.snowball_paths_for_key(key):
+					possible_paths.append([key] + path)
+			return possible_paths
+
+	def pretty_print_path(self, path):
+		for node in path:
+			print(' / '.join((list(self.anagram_dict[node]))))
+		#print(' --> '.join([random.choice((list(self.anagram_dict[node]))) for node in path]))
+
 
 
 def factorize_test(wf):

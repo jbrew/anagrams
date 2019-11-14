@@ -3,7 +3,7 @@
 
 class Game(object):
 
-	def __init__(self, distribution, word_finder, frequency_by_word):
+	def __init__(self, distribution, word_finder):
 		
 		self.all_letters = distribution
 		self.letter_pool = []
@@ -11,17 +11,10 @@ class Game(object):
 		self.player_words = {}		# format {'name': ['listed', 'words']}
 		
 		self.wf = word_finder
-		self.frequency_by_word = frequency_by_word
+		
 
 	def reveal_letter(self):
 		pass
-
-	def frequency(self, word):
-		key = word.upper()
-		if key in self.frequency_by_word:
-			return self.frequency_by_word[key]
-		else:
-			return 1	# default low frequency
 	
 	def available_plays(self, letters, words=[]):
 		"""
@@ -49,23 +42,10 @@ class Game(object):
 				plays_using_letters = list(self.wf.anagram_dict[product])
 				valid_plays = [p for p in plays_using_letters if len(p) > len(word)]
 				if len(valid_plays) > 0:
-					difference = self.difference_between_words(word, valid_plays[0])
+					difference = self.wf.difference_between_words(word, valid_plays[0])
 					plays.append({'base': word, 'additions': difference, 'results': valid_plays})
 
 		return plays
-
-	def difference_between_words(self, small, big):
-		"""
-		Return the letters that must be added to a smaller word
-		to make a bigger word.
-
-		Maybe we can do this more elegantly with primes.
-		"""
-		small, big = list(small), list(big)
-		while len(small) > 0:
-			big.remove(small[0])
-			small.pop(0)
-		return ''.join(big)
 
 	def possibilities(self, word, num_letters_added=1):
 		"""
@@ -84,7 +64,7 @@ class Game(object):
 
 		# sort by ascending length, then by frequency in the google corpus
 		return sorted(self.plays_for_word_and_combos(word, combo_keys),
-													 key=lambda x: (len(x['additions']), self.frequency(x['results'][0])))
+													 key=lambda x: (len(x['additions']), self.wf.frequency(x['results'][0])))
 
 
 
