@@ -187,13 +187,18 @@ class WordFinder(object):
 
 	def snowball_paths_for_word(self, word):
 		"""
-		Wrapper function for below
+		Wrapper function for snowball_paths_for_key
 		"""
 		key = self.anagram_key_for_letters(word)
 		paths = self.snowball_paths_for_key(key)
 		return paths
 
 	def snowball_paths_for_key(self, key):
+		"""
+		Given a key representing a word, return a list of all ways
+		to remove one letter from the set and get a valid set, descending
+		the tree until this is no longer possible.
+		"""
 		next_step = [key//prime for prime in self.primes if key % prime == 0]
 		valid_next_steps = [key for key in next_step if key in self.anagram_dict]
 		
