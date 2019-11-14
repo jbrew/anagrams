@@ -147,7 +147,6 @@ class WordFinder(object):
 			index += 1
 		return factor_tree_nodes
 
-
 	def find_binary_compounds(self, word, min_size):
 		"""
 		Find all ways (if there are any) to split word into
