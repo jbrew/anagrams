@@ -34,14 +34,14 @@ Find all words formable with any subset of the given letters and up to [num_blan
 `get_factor_tree_nodes(self, key, num_blanks=0)`
 Given a key representing a letter set, find keys for all unique letter sets formable by removing any number of letters and  adding up to [num_blanks] letters.
 
-*Note on handling blanks*
+	*Note on handling blanks*
 
-When adding a letter to the letter set, we want to find all the letter sets it enables, but we need to AVOID duplicating any of the letter sets that were already possible WITHOUT the blank.
+	When adding a letter to the letter set, we want to find all the letter sets it enables, but we need to AVOID duplicating any of the letter sets that were already possible WITHOUT the blank.
 
-Our approach here is to omit the letter's associated prime from the list of primes to check while descending the expanded letter set's factor tree. So once the blank has been added to the set via multiplication, we will not remove it by division.
+	Our approach here is to omit the letter's associated prime from the list of primes to check while descending the expanded letter set's factor tree. So once the blank has been added to the set via multiplication, we will not remove it by division.
 
-This has the effect of saying, to the expanded letter set fuction:
-	"DO NOT DELETE THIS NEW LETTER! YOU MUST USE IT!"
+	This has the effect of saying, to the expanded letter set fuction:
+		"DO NOT DELETE THIS NEW LETTER! YOU MUST USE IT!"
 
 `factor_tree_descendants(self, n, primes=None, start_index=0)`
 Returns a list of keys at all nodes in the factor tree with n as the root by trying to divide by all primes in the list after a given start_index.
