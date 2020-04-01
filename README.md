@@ -1,4 +1,4 @@
-# anagrams
+# snatch
 
 A library for playing and analyzing the game of [Snatch](https://en.wikipedia.org/wiki/Anagrams).
 
